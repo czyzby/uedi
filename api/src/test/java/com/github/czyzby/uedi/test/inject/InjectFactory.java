@@ -10,6 +10,10 @@ public class InjectFactory implements Factory {
         return new Built();
     }
 
+    public Double square(final Float parameter) {
+        return (double) parameter * parameter;
+    }
+
     // Ignored - static or not public:
     public static BigDecimal getZero() {
         return BigDecimal.ZERO;

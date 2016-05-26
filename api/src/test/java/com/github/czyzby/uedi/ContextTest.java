@@ -139,6 +139,15 @@ public abstract class ContextTest {
         assertNotEquals(context.get(Built.class), context.get(Built.class));
     }
 
+    @Test
+    public void shouldAllowPassingConsumersToFactoryMethods() {
+        final float consumer = 2f;
+        // InjectFactory contains square method, which consumes a Float parameter and returns a Double. Since this call
+        // requests a Double instance for (boxed) Float object, consumer should be injected as factory method parameter.
+        final double result = context.get(Double.class, consumer);
+        assertEquals(4, result, 0.001);
+    }
+
     @Test(expected = RuntimeException.class)
     public void shouldNotConvertStaticFactoryMethodsToProviders() {
         assertNotNull(context.get(InjectFactory.class));
