@@ -1,0 +1,1 @@
+include 'api', 'core', 'scanner/fallback', 'scanner/standard', 'scanner/java8'

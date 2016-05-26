@@ -1,0 +1,6 @@
+eclipse.project.name = 'uedi'
+
+dependencies {
+  compile "com.github.czyzby:uedi-api:$libVersion"
+}
+

@@ -1,0 +1,168 @@
+buildscript {
+  repositories {
+    mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://plugins.gradle.org/m2/" }
+  }
+  dependencies {
+    classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3"
+  }
+}
+
+apply plugin: 'distribution'
+apply plugin: 'io.codearte.nexus-staging'
+
+allprojects {
+  apply plugin: 'eclipse'
+  apply plugin: 'idea'
+  
+  ext {
+    projectVersion = '0.1'
+    isSnapshot = ''
+    libVersion = "$projectVersion$isSnapshot"
+  }
+}
+
+subprojects {
+  apply plugin: 'java'
+  apply plugin: 'maven'
+  apply plugin: 'signing'
+
+  ext {
+    wagonVersion = '2.10'
+    junitVersion = '4.12'
+    isReleaseVersion = !libVersion.endsWith("SNAPSHOT")
+  }
+
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+  }
+
+  sourceCompatibility = 1.6
+  targetCompatibility = 1.6
+  group = 'com.github.czyzby'
+  version = libVersion
+  archivesBaseName = projectName
+  eclipse.project.name = projectName
+
+  configurations {
+    deployerJars
+  }
+
+  jar {
+    from project.sourceSets.main.allSource
+    from project.sourceSets.main.output
+    baseName = archivesBaseName
+  }
+
+  dependencies {
+    testCompile "junit:junit:$junitVersion"
+    deployerJars "org.apache.maven.wagon:wagon-ssh:$wagonVersion"
+    deployerJars "org.apache.maven.wagon:wagon-http:$wagonVersion"
+  }
+
+  task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+  }
+
+  task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+  }
+
+  artifacts {
+    archives javadocJar, sourcesJar
+  }
+
+  signing {
+    required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+  }
+
+  uploadArchives {
+    repositories {
+      mavenDeployer {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+        repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+          authentication(userName: ossrhUsername, password: ossrhPassword)
+        }
+
+        snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+          authentication(userName: ossrhUsername, password: ossrhPassword)
+        }
+
+        pom.project {
+          name = projectName
+          packaging 'jar'
+          description = projectDesc
+          url 'http://github.com/czyzby/uedi'
+
+          licenses {
+            license {
+              name 'The Apache License, Version 2.0'
+              url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            }
+          }
+          
+          scm {
+            connection 'scm:git:git@github.com:czyzby/uedi.git'
+            developerConnection 'scm:git:git@github.com:czyzby/uedi.git'
+            url 'http://github.com/czyzby/uedi/'
+          }
+
+          developers {
+            developer {
+              id 'mj'
+              name 'MJ'
+              email 'john.hervicc@gmail.com'
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Invokes 'build' and 'install' tasks on all projects in the correct order.
+// Prefer this over 'gradle build install' when changing the version of library.
+task installAll(dependsOn: ['installCore', 'scanner/fallback:build',
+  'scanner/fallback:install', 'scanner/java8:build', 'scanner/java8:install',
+  'scanner/standard:build', 'scanner/standard:install'])
+task installCore(dependsOn: ['installApi', 'core:build', 'core:install'])
+task installApi(dependsOn: ['api:build', 'api:install'])
+
+nexusStaging {
+  packageGroup = 'com.github.czyzby'
+  username = ossrhUsername
+  password = ossrhPassword
+}
+
+distributions {
+  main {
+    baseName = libVersion
+    contents {
+      project.subprojects.each { sub ->
+        into('lib') {
+          from sub.jar
+        }
+        into('src') {
+          from sub.sourcesJar
+        }
+        into('doc') {
+          from sub.javadocJar
+        }
+      }
+    }
+  }
+}
+
+tasks.eclipse.doLast {
+  delete ".project"
+  delete ".classpath"
+  delete ".settings/"
+}
