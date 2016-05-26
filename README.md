@@ -111,11 +111,11 @@ public interface Ambiguous {
 // The Java way:
 @Component
 @Named("one")
-public class One {
+public class One implements Ambiguous {
 }
 @Component
 @Named("two")
-public class Two {
+public class Two implements Ambiguous {
 }
 @Component
 public class Consumer {
@@ -124,10 +124,10 @@ public class Consumer {
 }
 
 // The UEDI way:
-public class Three implements Named, Singleton {
+public class Three implements Ambiguous, Named, Singleton {
   public String getName() { return "three"; }
 }
-public class Four implements Named, Singleton {
+public class Four implements Ambiguous, Named, Singleton {
   public String getName() { return "four"; }
 }
 public class Consumer implements Singleton {
