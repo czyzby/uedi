@@ -7,8 +7,9 @@ ext {
 }
 
 dependencies {
-  compile "com.github.czyzby:uedi-core:$libVersion"
+  compile "com.github.czyzby:uedi-api:$libVersion"
   compile "io.github.lukehutch:fast-classpath-scanner:$fcsVersion"
   testCompile project(':api')
+  testCompile project(':core')
   testCompile files(project(':api').sourceSets.test.output.classesDir)
 }

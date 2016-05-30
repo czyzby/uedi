@@ -92,6 +92,9 @@ public interface Context {
      * @throws NullPointerException if property is not registered. */
     void setProperty(String key, String value);
 
+    /** @param destructible will be eventually destroyed by the context. */
+    void addDestructible(Destructible destructible);
+
     /** @param type required type of component.
      * @param <Component> class of requested component or one of interfaces or one of its super classes.
      * @return a new instance of the selected class created and initiated by the context. Does not invoke existing

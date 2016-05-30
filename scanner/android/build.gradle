@@ -1,0 +1,10 @@
+apply plugin: 'nebula.provided-base'
+
+ext {
+  androidVersion = '4.1.1.4'
+}
+
+dependencies {
+  compile "com.github.czyzby:uedi-api:$libVersion"
+  provided "com.google.android:android:$androidVersion"
+}

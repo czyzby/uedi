@@ -1,0 +1,17 @@
+apply plugin: 'nebula.provided-base'
+
+eclipse.project.name = 'uedi-gwt'
+
+ext {
+  gwtVersion = '2.6.1'
+}
+
+javadoc {
+  options.addStringOption("sourcepath", "")
+}
+
+dependencies {
+  compile "com.github.czyzby:uedi-api:$libVersion"
+  provided "com.google.gwt:gwt-user:$gwtVersion"
+  provided "com.google.gwt:gwt-dev:$gwtVersion"
+}

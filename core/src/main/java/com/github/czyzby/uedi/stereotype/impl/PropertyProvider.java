@@ -5,12 +5,11 @@ import java.util.Map;
 
 import com.github.czyzby.uedi.stereotype.Default;
 import com.github.czyzby.uedi.stereotype.Property;
-import com.github.czyzby.uedi.stereotype.Provider;
 
 /** Provides string properties using {@link Property} API.
  *
  * @author MJ */
-public class PropertyProvider implements Provider<String>, Default {
+public class PropertyProvider implements Default, StringProvider {
     private final Map<String, Property> properties;
 
     /** @param properties will be used to store properties mapped by their keys. Should be thread-safe is used in
@@ -19,19 +18,17 @@ public class PropertyProvider implements Provider<String>, Default {
         this.properties = properties;
     }
 
-    /** @param key unique ID of the property.
-     * @return true if a property instance was registered to the key. */
+    @Override
     public boolean hasProperty(final String key) {
         return properties.containsKey(key);
     }
 
-    /** @param key unique ID of the property.
-     * @return {@link Property} instance mapped to the ID or null if not registered. */
+    @Override
     public Property getProperty(final String key) {
         return properties.get(key);
     }
 
-    /** @param property will be mapped to its {@link Property#getKey() key}. */
+    @Override
     public void addProperty(final Property property) {
         properties.put(property.getKey(), property);
     }

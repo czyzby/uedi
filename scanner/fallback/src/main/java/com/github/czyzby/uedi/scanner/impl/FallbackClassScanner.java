@@ -19,8 +19,7 @@ import com.github.czyzby.uedi.scanner.ClassScanner;
 
 /** Uses reflection to analyze current classpath.
  *
- * @author MJ
- * @see FixedClassScanner */
+ * @author MJ */
 public class FallbackClassScanner implements ClassScanner {
     private static final String CLASS_FILE_EXTENSION = ".class";
     private static final String JAR_FILE_EXTENSION = ".jar";
@@ -56,7 +55,7 @@ public class FallbackClassScanner implements ClassScanner {
     protected void ignore(final Exception expectedException) {
     }
 
-    private static Set<Class<?>> extractFromBinaries(final String mainPackageName,
+    private Set<Class<?>> extractFromBinaries(final String mainPackageName,
             final Queue<DepthFile> filesWithDepthsToProcess, final Class<?>... interfaces) throws Exception {
         final Set<Class<?>> result = new HashSet<Class<?>>();
         while (!filesWithDepthsToProcess.isEmpty()) {
@@ -71,7 +70,9 @@ public class FallbackClassScanner implements ClassScanner {
                     continue;
                 }
                 final Class<?> classToProcess = Class.forName(className);
-                processClass(result, classToProcess, interfaces);
+                if (isNotAbstract(classToProcess) && isInstanceOfAny(classToProcess, interfaces)) {
+                    result.add(classToProcess);
+                }
             }
         }
         return result;
@@ -109,7 +110,7 @@ public class FallbackClassScanner implements ClassScanner {
         return mainPackageName.replace('.', File.separatorChar);
     }
 
-    private static Set<Class<?>> extractFromJar(final String classPathRoot, final ClassLoader classLoader,
+    private Set<Class<?>> extractFromJar(final String classPathRoot, final ClassLoader classLoader,
             final Class<?>... interfaces) throws Exception {
         final List<JarFile> filesToProcess = getJarFilesToProcess();
         final Set<Class<?>> result = new HashSet<Class<?>>();
@@ -134,27 +135,16 @@ public class FallbackClassScanner implements ClassScanner {
         return filesToProcess;
     }
 
-    private static void processEntry(final String classPathRoot, final Set<Class<?>> result, final JarEntry entry,
+    private void processEntry(final String classPathRoot, final Set<Class<?>> result, final JarEntry entry,
             final Class<?>... interfaces) throws Exception {
         if (!entry.isDirectory()) {
             final String entryName = entry.getName().replace('/', File.separatorChar);
             if (isFromPackage(classPathRoot, entryName) && entryName.endsWith(CLASS_FILE_EXTENSION)) {
                 final String className = jarEntryToClassName(entryName);
                 final Class<?> classToProcess = Class.forName(className);
-                processClass(result, classToProcess, interfaces);
-            }
-        }
-    }
-
-    private static void processClass(final Set<Class<?>> result, final Class<?> classToProcess,
-            final Class<?>... interfaces) {
-        if (Modifier.isAbstract(classToProcess.getModifiers()) || classToProcess.isInterface()) {
-            return;
-        }
-        for (final Class<?> possibleMatch : interfaces) {
-            if (possibleMatch.isAssignableFrom(classToProcess)) {
-                result.add(classToProcess);
-                return;
+                if (isNotAbstract(classToProcess) && isInstanceOfAny(classToProcess, interfaces)) {
+                    result.add(classToProcess);
+                }
             }
         }
     }
@@ -162,6 +152,25 @@ public class FallbackClassScanner implements ClassScanner {
     private static String jarEntryToClassName(final String entryName) {
         return entryName.substring(0, entryName.length() - CLASS_FILE_EXTENSION.length()).replace(File.separatorChar,
                 '.');
+    }
+
+    /** @param testedClass will be validated
+     * @return true if the class is not abstract or anonymous and not an interface. */
+    protected boolean isNotAbstract(final Class<?> testedClass) {
+        return !Modifier.isAbstract(testedClass.getModifiers()) && !testedClass.isAnonymousClass()
+                && !testedClass.isInterface();
+    }
+
+    /** @param testedClass will be validated.
+     * @param interfaces set of interfaces to be checked against.
+     * @return true if the class implements any of the passed interfaces. */
+    protected boolean isInstanceOfAny(final Class<?> testedClass, final Class<?>[] interfaces) {
+        for (final Class<?> possibleMatch : interfaces) {
+            if (possibleMatch.isAssignableFrom(testedClass)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Utility container.

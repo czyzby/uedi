@@ -34,6 +34,7 @@ import com.github.czyzby.uedi.stereotype.impl.ProviderManager;
 import com.github.czyzby.uedi.stereotype.impl.Providers;
 import com.github.czyzby.uedi.stereotype.impl.ReflectionProvider;
 import com.github.czyzby.uedi.stereotype.impl.SingletonProvider;
+import com.github.czyzby.uedi.stereotype.impl.StringProvider;
 
 /** Core implementation of context management. Not thread-safe.
  *
@@ -49,7 +50,7 @@ public class DefaultContext extends AbstractContext {
 
     private final Map<Class<?>, Provider<?>> context = createMap();
     private final Set<Destructible> destructibles = createSet();
-    private final PropertyProvider propertyProvider = new PropertyProvider(this.<String, Property> createMap());
+    private final StringProvider propertyProvider = getPropertyProvider();
 
     static {
         // Meta interfaces used by the SDI framework:
@@ -85,6 +86,11 @@ public class DefaultContext extends AbstractContext {
     public DefaultContext(final ClassScanner classScanner) {
         super(classScanner);
         addCoreProviders();
+    }
+
+    /** @return default provider of {@link String} instances. */
+    protected StringProvider getPropertyProvider() {
+        return new PropertyProvider(this.<String, Property> createMap());
     }
 
     /** Registers {@link Context} (so it can be injected) and binds {@link PropertyProvider} to {@link String}
@@ -151,6 +157,11 @@ public class DefaultContext extends AbstractContext {
     @Override
     public void addProperty(final Property property) {
         propertyProvider.addProperty(property);
+    }
+
+    @Override
+    public void addDestructible(final Destructible destructible) {
+        destructibles.add(destructible);
     }
 
     @Override
@@ -438,6 +449,9 @@ public class DefaultContext extends AbstractContext {
         classesToProcess.add(provider.getType());
         while (!classesToProcess.isEmpty()) {
             final Class<?> processed = classesToProcess.poll();
+            if (processedClasses.contains(processed)) {
+                continue;
+            }
             processedClasses.add(processed);
             putProvider(processed, provider);
             final Class<?> parent = processed.getSuperclass();
@@ -524,6 +538,9 @@ public class DefaultContext extends AbstractContext {
         classesToProcess.add(classTree);
         while (!classesToProcess.isEmpty()) {
             final Class<?> processed = classesToProcess.poll();
+            if (processedClasses.contains(processed)) {
+                continue;
+            }
             processedClasses.add(processed);
             remove(processed);
             final Class<?> parent = processed.getSuperclass();

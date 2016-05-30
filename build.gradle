@@ -1,11 +1,13 @@
 buildscript {
   repositories {
     mavenCentral()
+    jcenter()
     maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
     maven { url "https://plugins.gradle.org/m2/" }
   }
   dependencies {
     classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3"
+    classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:3.0.3'
   }
 }
 
@@ -17,8 +19,8 @@ allprojects {
   apply plugin: 'idea'
   
   ext {
-    projectVersion = '0.1'
-    isSnapshot = ''
+    projectVersion = '0.2'
+    isSnapshot = '-SNAPSHOT'
     libVersion = "$projectVersion$isSnapshot"
   }
 }
@@ -132,7 +134,9 @@ subprojects {
 // Prefer this over 'gradle build install' when changing the version of library.
 task installAll(dependsOn: ['installCore', 'scanner/fallback:build',
   'scanner/fallback:install', 'scanner/java8:build', 'scanner/java8:install',
-  'scanner/standard:build', 'scanner/standard:install'])
+  'scanner/standard:build', 'scanner/standard:install', 'scanner/android:build',
+  'scanner/android:install', 'scanner/jtransc:build', 'scanner/jtransc:install',
+  'scanner/gwt:build', 'scanner/gwt:install' ])
 task installCore(dependsOn: ['installApi', 'core:build', 'core:install'])
 task installApi(dependsOn: ['api:build', 'api:install'])
 

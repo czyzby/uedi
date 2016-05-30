@@ -189,7 +189,7 @@ I *will* be happy to help with the API or improve some features if anyone decide
 > How to get started?
 
 ```
-Context context = DependencyInjection.newContext();
+Context context = DependencyInjection.newContext(classScanner);
 context.scan(Root.class);
 context.get(SomeComponent.class).doSomethingImportant();
 ```
@@ -249,12 +249,16 @@ Look through the [unit tests](api/src/test/java/com/github/czyzby/uedi), they sh
 
 Library dependencies using Gradle syntax:
 - `"com.github.czyzby:uedi-api:$uediVersion"`: contains only the necessary interfaces.
-- `"com.github.czyzby:uedi-core:$uediVersion"`: base for all other libraries. Use it directly if you're filling brave and want to implement custom class scanner. Java 6-compatible.
-- `"com.github.czyzby:uedi-fallback:$uediVersion"`: Java 6-compatible. Uses crude reflection-based scanner to find components. Use when absolutely necessary.
-- `"com.github.czyzby:uedi:$uediVersion"`: default library if you don't have access to Java 8. Java 7-compatible. Uses [fast-classpath-scanner](https://github.com/lukehutch/fast-classpath-scanner) to scan for components without reflection.
-- `"com.github.czyzby:uedi-java8:$uediVersion"`: adds supports for Java 8 features. Uses [fast-classpath-scanner](https://github.com/lukehutch/fast-classpath-scanner). Thanks to `-parameters` compiler flag, you're able to resolve ambiguous dependencies in constructors and methods. Features highly scalable non-blocking collections in the concurrent context variant.
+- `"com.github.czyzby:uedi-core:$uediVersion"`: base for all other libraries. Default implementation of `uedi-api`.
+- `"com.github.czyzby:uedi-fallback:$uediVersion"`: Java 6-compatible. Provides `FallbackClassScanner`. Uses crude reflection-based scanner to find components. Use when absolutely necessary.
+- `"com.github.czyzby:uedi:$uediVersion"`: default library if you don't have access to Java 8. Provides `DefaultClassScanner`. Java 7-compatible. Uses [fast-classpath-scanner](https://github.com/lukehutch/fast-classpath-scanner) to scan for components without reflection.
+- `"com.github.czyzby:uedi-java8:$uediVersion"`: adds supports for Java 8 features. Provides `StandardClassScanner`. Uses [fast-classpath-scanner](https://github.com/lukehutch/fast-classpath-scanner). Thanks to `-parameters` compiler flag, you're able to resolve ambiguous dependencies in constructors and methods. Features highly scalable non-blocking collections in the concurrent context variant. This is NOT implementation-agnostic: this library depends directly on `uedi-core` and cannot be used with LibGDX UEDI implementation, for example.
+- `"com.github.czyzby:uedi-android:$uediVersion"`: implements `AndroidClassScanner`, which uses "native" API to go through available classes.
+- `"com.github.czyzby:uedi-jtransc:$uediVersion"`: implements `JTranscClassScanner`, which uses "native" API to go through available classes.
 
-Use whichever library matches your targeted Java version.
+Use whichever library matches your targeted Java version or platform. Go through each library project for additional data (in their `README` files).
+
+See [gdx-uedi](https://github.com/czyzby/gdx-lml/tree/master/uedi) for LibGDX-specific `uedi-api` implementation that works on every targeted LibGDX platform.
 
 #### License
 

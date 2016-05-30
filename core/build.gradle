@@ -2,5 +2,7 @@ eclipse.project.name = 'uedi'
 
 dependencies {
   compile "com.github.czyzby:uedi-api:$libVersion"
+  testCompile project(':api')
+  testCompile files(project(':api').sourceSets.test.output.classesDir)
 }
 

@@ -1,7 +1,8 @@
 eclipse.project.name = 'uedi-java6'
 
 dependencies {
-  compile "com.github.czyzby:uedi-core:$libVersion"
+  compile "com.github.czyzby:uedi-api:$libVersion"
   testCompile project(':api')
+  testCompile project(':core')
   testCompile files(project(':api').sourceSets.test.output.classesDir)
 }
