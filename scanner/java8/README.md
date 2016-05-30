@@ -4,7 +4,6 @@ UEDI enhanced with Java 8 features. Thanks to the new `Parameter` class from ref
 
 Use `ExtendedInjection` instead of `DependencyInjection` to quickly construct parameter-aware `Context` instances.
 
-
 ### Dependency
 
 Gradle dependency:
@@ -14,9 +13,9 @@ Gradle dependency:
 
 You should also include the additional compiler flag:
 ```
-  compileJava {
-    options.compilerArgs << '-parameters'
-  }
+compileJava {
+  options.compilerArgs << '-parameters'
+}
 ```
 
 Note that `uedi-java8` already comes with the `uedi-core` library - an implementation of the `uedi-api`. `Context` instances provided by this library are parameter-aware.
