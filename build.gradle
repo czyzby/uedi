@@ -24,6 +24,7 @@ allprojects {
     libVersion = "$projectVersion$isSnapshot"
   }
 }
+eclipse.project.name = 'dummy'
 
 subprojects {
   apply plugin: 'java'

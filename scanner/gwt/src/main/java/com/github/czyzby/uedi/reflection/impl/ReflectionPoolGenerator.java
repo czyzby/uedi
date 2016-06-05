@@ -111,7 +111,12 @@ public class ReflectionPoolGenerator extends Generator {
 
     protected String getRootPackage(final GeneratorContext context, final TreeLogger logger) {
         try {
-            return context.getPropertyOracle().getConfigurationProperty(UEDI_ROOT_PROPERTY).getValues().get(0);
+            final String rootPackage = context.getPropertyOracle().getConfigurationProperty(UEDI_ROOT_PROPERTY)
+                    .getValues().get(0);
+            if (rootPackage == null) {
+                throw new RuntimeException("'uedi.root' property is not set.");
+            }
+            return rootPackage;
         } catch (final Exception exception) {
             logger.log(Type.WARN,
                     "UEDI: Unable to find 'uedi.root' property. Including all matching types in classpath.", exception);
