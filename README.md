@@ -36,7 +36,7 @@ How does a world without annotations look? Certainly more readable. There are so
 
 - Simple injection:
 
-```
+```Java
 // The Java way:
 @Component
 public class SomeComponent {
@@ -73,7 +73,7 @@ public class SomeComponent implements Singleton {
 ```
 
 - Factories (assuming automatic component scanning and no awkward registration phase in the Java way - which happens more than often):
-```
+```Java
 // The Java way:
 @Provider
 public class SomeFactory {
@@ -104,7 +104,7 @@ public class SomeFactory implements Factory {
 
 - Ambiguous field injections:
 
-```
+```Java
 public interface Ambiguous {
 }
 
@@ -137,7 +137,7 @@ public class Consumer implements Singleton {
 ```
 
 - Ambiguous method/constructor injections:
-```
+```Java
 // The Java way:
 @Provider
 public class SomeFactory {
@@ -188,7 +188,7 @@ I *will* be happy to help with the API or improve some features if anyone decide
 
 > How to get started?
 
-```
+```Java
 Context context = DependencyInjection.newContext(classScanner);
 context.scan(Root.class);
 context.get(SomeComponent.class).doSomethingImportant();
